@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="co.micol.prj.emp.mapper.EmployeeMapper"> 
+
+<select id="selectEmployees"
+		resultType="employee">
+	select a.*, b.department_name
+     from employees a, departments b
+     where a.department_id = b.department_id
+     order by employee_id 
+		</select>
+
+<insert id="insertEmployees" >
+	insert into employees values (#{employee_id},#{first_name},#{last_name},#{email},#{phone_number},sysdate,#{job_id},#{salary},null,null,#{department_id})
+</insert>
+
+<insert id="deleteEmployees" >
+	delete from employees
+	where employee_id = #{employee_id}
+</insert>
+
+<update id="updateEmployees" >
+	update employees
+	   set first_name = #{first_name},
+		   last_name = #{last_name},
+		   email = #{email},
+		   phone_number = #{phone_number},
+		   job_id = #{job_id},
+		   salary = #{salary}    
+	where employee_id = #{employee_id}
+</update>
+
+<select id="selectJobs" resultType="jobs">
+	select job_id, job_title 
+	  from jobs
+	 order by job_id 
+</select>
+
+<select id="selectDepartments" resultType="departments">
+	select a.department_id, a.department_name 
+	  from departments a
+	 order by a.department_id 
+</select>
+
+</mapper>

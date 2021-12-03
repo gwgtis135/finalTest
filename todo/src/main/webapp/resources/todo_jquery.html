@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+<style>
+body {
+  margin: 0;
+  min-width: 250px;
+}
+
+/* Include the padding and border in an element's total width and height */
+* {
+  box-sizing: border-box;
+}
+
+/* Remove margins and padding from the list */
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+/* Style the list items */
+ul li {
+  cursor: pointer;
+  position: relative;
+  padding: 12px 8px 12px 40px;
+  list-style-type: none;
+  background: #eee;
+  font-size: 18px;
+  transition: 0.2s;
+  
+  /* make the list items unselectable */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Set all odd list items to a different color (zebra-stripes) */
+ul li:nth-child(odd) {
+  background: #f9f9f9;
+}
+
+/* Darker background-color on hover */
+ul li:hover {
+  background: #ddd;
+}
+
+/* When clicked on, add a background color and strike out text */
+ul li.checked {
+  background: #888;
+  color: #fff;
+  text-decoration: line-through;
+}
+
+/* Add a "checked" mark when clicked on */
+ul li.checked::before {
+  content: '';
+  position: absolute;
+  border-color: #fff;
+  border-style: solid;
+  border-width: 0 2px 2px 0;
+  top: 10px;
+  left: 16px;
+  transform: rotate(45deg);
+  height: 15px;
+  width: 7px;
+}
+
+/* Style the close button */
+.close {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 12px 16px 12px 16px;
+}
+
+.close:hover {
+  background-color: #f44336;
+  color: white;
+}
+
+/* Style the header */
+.header {
+  background-color: #f44336;
+  padding: 30px 40px;
+  color: white;
+  text-align: center;
+}
+
+/* Clear floats after the header */
+.header:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Style the input */
+input {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  width: 75%;
+  padding: 10px;
+  float: left;
+  font-size: 16px;
+}
+
+/* Style the "Add" button */
+.addBtn {
+  padding: 10px;
+  width: 25%;
+  background: #d9d9d9;
+  color: #555;
+  float: left;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  border-radius: 0;
+}
+
+.addBtn:hover {
+  background-color: #bbb;
+}
+</style>
+</head>
+<body>
+
+<div id="myDIV" class="header">
+  <h2 style="margin:5px">My To Do List</h2>
+  <input type="text" id="myInput" placeholder="Title...">
+  <span class="addBtn">Add</span>
+</div>
+
+<ul id="myUL">
+  <li class="checked">Organize office</li>
+</ul>
+
+<script>
+
+//ajax 실행
+$.ajax({
+	url:"/prj/todoSelect",
+	method : "get",
+	datatype: "json",
+	
+}).done(data=>{
+	for(emp of data){
+		newElement(emp);
+	}
+})
+/* fetch("/prj/todoSelect")
+.then(response => response.json())
+.then(result => {for(emp of result){
+newElement(emp);
+
+}}) */
+/* $.get("/prj/todoSelect",null,null,"json").done(data=>{
+	for(emp of data){
+		newElement(emp);
+	}
+})
+ */
+
+// Add a "checked" symbol when clicking on a list item
+var list = document.querySelector('ul');
+list.addEventListener('click', function(ev) {
+
+	var todoyn;
+	
+	if(ev.target.classList.contains("checked")){
+		todoyn=0;
+	}else{
+		todoyn=1;
+	}// todoyn= ev.target.classList.contains("checked") ? 0:1;
+  if (ev.target.tagName === 'LI') {
+ 
+	  $.ajax({url:"/prj/todoUpdate",
+	  	data : {no: $(ev.target).data('no'), todoyn: todoyn},
+	  	method: "post",
+	  	dataType: "json"
+	  }).done(result =>{
+		  ev.target.classList.toggle('checked')
+	  }); 
+	  
+/* 	  $.post("/prj/todoUpdate",{no : $(ev.target).data('no'), todoyn : todoyn},null,"json").
+	  done(result =>{
+    	
+    	   ev.target.classList.toggle('checked')}); */
+    //update fetch
+   /*  fetch("/prj/todoUpdate",{
+		method: 'post',
+		headers: {
+		     // 'Content-Type': 'application/json'
+		       'Content-Type': 'application/x-www-form-urlencoded',
+		    },
+		    body : 
+		    	"no="+ev.target.getAttribute("data-no")+"&todoyn="+todoyn
+
+		    
+	})
+	.then(response => response.json())
+    .then(result =>{
+    	
+    	   ev.target.classList.toggle('checked');
+    }) */
+  }
+}, false);
+
+document.getElementsByClassName('addBtn')[0].addEventListener('click',function(){
+	let inputValue = document.getElementById("myInput").value;
+	//텍스트 필드가 널이면 alert
+	if(document.getElementById('myInput').value==""){
+		alert("내용이 비었습니다.")
+		return;
+	}else{
+	//등록요청
+	$.ajax({
+		url : "/prj/todoInsert",
+		dataType: "json",
+		method: "post",
+		data : {contents: inputValue}
+	}).done(result =>{
+		newElement(result);
+	})
+/* 	$.post("/prj/todoInsert",{contents:inputValue},null,'json'
+		
+	).done(result=>{
+	newElement(result);	
+	}) */
+/* 	fetch("/prj/todoInsert",{
+		method: 'post',
+		headers: {
+		     // 'Content-Type': 'application/json'
+		       'Content-Type': 'application/x-www-form-urlencoded',
+		    },
+		    body : 
+		    	"contents="+inputValue
+		    
+		    
+	})
+	.then(response => response.json())
+	.then(result =>{
+		newElement(result)
+	}) */
+	//newelement()
+	
+
+}})
+
+
+
+
+// Create a new list item when clicking on the "Add" button
+function newElement(inputValue) {
+  var li = document.createElement("li");
+
+  li.innerHTML = inputValue.contents;
+  li.setAttribute('data-no',inputValue.no);
+  if(inputValue.todoyn==1){
+	  li.className ='checked'
+  }
+/*   var t = document.createTextNode(inputValue);
+  li.appendChild(t); */
+  if (inputValue === '') {
+    
+  } else {
+    document.getElementById("myUL").appendChild(li);
+  }
+  document.getElementById("myInput").value = "";
+
+  var span = document.createElement("SPAN");
+  var txt = document.createTextNode("\u00D7");
+  span.className = "close";
+  span.appendChild(txt);
+  li.appendChild(span);
+span.onclick =function(){
+	var li =this.parentElement;
+	var no = li.getAttribute('data-no')
+	$.ajax({
+		url: "/prj/todoDelete?no="+no,
+		
+		dataType: "json"
+	}).done(result=>{li.remove()})
+/* 	$.get("/prj/todoDelete?no="+no,"json").done(result=>{li.remove()})	 */
+	
+	
+	/* fetch("/prj/todoDelete?no="+no)
+		.then(response=>response.json())
+		.then(result =>{
+			li.remove();
+		}) */
+	
+}
+
+/*     document.getElementsByTagName("ul")[0].addEventListener("li","click", function() {
+      var div = this.parentElement;
+      console.log(div);
+      div.style.display = "none"; 
+    
+  })*/
+}
+</script>
+
+</body>
+</html>
